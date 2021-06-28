@@ -1,0 +1,53 @@
+version: "3"
+
+services:
+  nginx1:
+    container_name: nginx1
+    restart: always
+    image: nginx:latest
+    networks:
+      - net1
+    ports:
+      - "8001:8001"
+    expose:
+      - 8001
+    volumes:
+      - ./config1/:/etc/nginx/conf.d/
+  
+  nginx2:
+    container_name: nginx2
+    restart: always
+    image: nginx:latest
+    networks:
+      - net2
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./config2/:/etc/nginx/conf.d/   
+ 
+  grafana:
+    container_name: grafana
+    restart: unless-stopped
+    image: grafana/grafana:master-ubuntu           
+    volumes:
+      - grafana_data:/var/lib/grafana      
+    networks:
+      - net1
+      - net2
+    expose:
+      - 3000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "nginx1:8001"]
+      interval: 3s
+      timeout: 2s
+      retries: 3  
+      
+   
+  
+volumes:
+    grafana_data: {}
+
+networks:
+  net1:
+  net2:
+
